@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Carros</title>
+        <style>
+            #notificationsPanel {
+                background-color: #fff;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                padding: 10px;
+                width: 80%;
+                margin: 20px auto;
+                text-align: left;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            .notification {
+                border-bottom: 1px solid #eee;
+                padding: 5px 0;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #E2E2E2;
+                color: #333;
+                text-align: center;
+                padding-top: 50px;
+            }
+            h1 {
+                font-size: 24px;
+                color: #333;
+            }
+            .form-container {
+                background-color: #F9F9F9;
+                border: 1px solid #CCC;
+                border-radius: 10px;
+                padding: 20px;
+                width: 300px;
+                margin: 0 auto;
+            }
+            label {
+                display: block;
+                margin: 10px 0 5px;
+                text-align: left;
+            }
+            input[type="text"], textarea {
+                width: calc(100% - 22px);
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #CCC;
+                border-radius: 5px;
+            }
+            input[type="submit"], .button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                margin: 10px 0;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+            }
+            input[type="submit"]:hover, .button:hover {
+                background-color: #45a049;
+            }
+        </style>
+    </h:head>
+    <h:body onload="openSocket()">
+
+        <div class="form-container">
+            <h1>Gestión de Autos</h1>
+            <h:form>
+                <h:messages globalOnly="true" layout="table" style="color: red;"/>
+
+                <label for="marca">Marca:</label>
+                <h:inputText id="marca" value="#{controller2.vehiculo.marca}" /><br />
+
+                <label for="placa">Placa:</label>
+                <h:inputText id="placa" value="#{controller2.vehiculo.placa}" /><br />
+
+                <label for="modelo">Modelo:</label>
+                <h:inputText id="modelo" value="#{controller2.vehiculo.modelo}" /><br />
+
+                <label for="color">Color:</label>
+                <h:inputText id="color" value="#{controller2.vehiculo.color}" /><br />
+
+                <h:commandButton value="Insertar Auto" action="#{controller2.agregarAuto()}" styleClass="button" />
+            </h:form>
+        </div>
+        
+        <div class="form-container">
+            <h:form>
+                <h:messages globalOnly="true" layout="table" style="color: red;"/>
+
+                <label for="paraQuien">Para:</label>
+                <h:inputText id="paraQuien" value="#{mail.paraQuien}"/><br />
+
+                <label for="asunto">Asunto:</label>
+                <h:inputText id="asunto" value="#{mail.asunto}"/><br />
+
+                <label for="mensaje">Mensaje:</label>
+                <h:inputTextarea id="mensaje" value="#{mail.mensaje}"/><br />
+
+                <h:commandButton value="Enviar lista de vehículos" action="#{controller.enviarListaVehiculos()}" styleClass="button" /><br />
+                <h:commandButton value="Imprimir reporte completo" action="#{controller.PDF()}" styleClass="button" /><br />
+                <h:commandButton value="Imprimir reporte solo mazda" action="#{controller.PDFMazda()}" styleClass="button" /><br />
+                <h:commandButton value="Notificar Cantidad de Carros" action="#{controller2.notificarCantidadCarros}" styleClass="button" />
+            </h:form>
+        </div>
+
+        <div id="notificationsPanel">
+            <!-- Aquí se mostrarán las notificaciones -->
+        </div>
+
+        <script type="text/javascript">
+            var webSocket;
+            var notificationsPanel = document.getElementById("notificationsPanel");
+
+            function openSocket() {
+                if (webSocket !== undefined &amp;&amp; webSocket.readyState !== WebSocket.CLOSED) {
+                    return;
+                }
+                webSocket = new WebSocket("ws://localhost:8080/WebSocket/proceso");
+
+                webSocket.onopen = function(event) {
+                    console.log("Conexión establecida");
+                };
+
+                webSocket.onmessage = function(event) {
+                    showNotification(event.data);
+                };
+
+                webSocket.onclose = function(event) {
+                    console.log("Conexión cerrada");
+                };
+            }
+
+            function showNotification(text) {
+                var notification = document.createElement("div");
+                notification.className = "notification";
+                notification.textContent = text;
+                notificationsPanel.appendChild(notification);
+                notificationsPanel.scrollTop = notificationsPanel.scrollHeight;  // Scroll to the bottom
+            }
+        </script>
+    </h:body>
+</html>
